@@ -18,22 +18,29 @@ exports.importAccounts = function (request, response) {
 						message: err
 					})
 				} else {
-					fileRows = fileRows.map((a) => {
+					fileRows = fileRows.filter(a => a.UserName && a.FirstName && a.LastName && a.Age).map((a) => {
 						return [a.UserName, a.FirstName, a.LastName, a.Age]
 					});
-					insertDataToDb(fileRows, (error) => {
-						if (error) {
-							response.json({
-								status: 500,
-								message: error
-							})
-						} else {
-							response.json({
-								status: 200,
-								message: 'Successfully added to DB!'
-							})
-						}
-					});
+					if (!fileRows.length) {
+						response.json({
+							status: 400,
+							message: 'Unverified format of CSV file!'
+						})
+					} else {
+						insertDataToDb(fileRows, (error) => {
+							if (error) {
+								response.json({
+									status: 500,
+									message: error
+								})
+							} else {
+								response.json({
+									status: 200,
+									message: 'Successfully added to DB!'
+								})
+							}
+						});
+					}
 				}
 			});
 		})
